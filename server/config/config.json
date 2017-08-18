@@ -1,0 +1,7 @@
+{
+  "development": {
+    "PORT": 3000,
+    "MONGODB_URI": "mongodb://localhost:27017/TravelItinerary",
+    "JWT_SECRET": "oisjoijds38293jjds823u0lk23o1ij8"
+  }
+}
