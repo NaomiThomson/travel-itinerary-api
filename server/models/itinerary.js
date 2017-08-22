@@ -1,13 +1,15 @@
 var mongoose = require('mongoose');
 
-var Item = mongoose.model('Item',{
-  name: {
-    type: String,
-    required: true,
-    minlength: 1,
-    trim: true
+var Itinerary = mongoose.model('Itinerary',{
+  startDate: {
+    type: Date,
+    required: true
   },
-  category: {
+  endDate: {
+    type: Date,
+    required: true
+  },
+  location: {
     type: String,
     required: true
   },
@@ -21,7 +23,11 @@ var Item = mongoose.model('Item',{
   _creator: {
       type: mongoose.Schema.Types.ObjectId,
       required: true
+  },
+  _created: {
+    type: Date,
+    default: Date.now
   }
 });
 
-module.exports = {Item};
+module.exports = {Itinerary};

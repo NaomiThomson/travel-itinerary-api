@@ -98,19 +98,13 @@ app.get('/image', (req, res) => {
 });
 
 
-app.get('/image2', (req, res) => {
-  res.sendFile(__dirname + '/images/inventory/default.jpg');
-});
-
 //----------------------------
 
 app.post('/users', (req, res) => {
   //creates a user
-  var body = _.pick(req.body, ['email', 'password', 'address', 'firstName', 'lastName', 'phoneNumber', 'DLNumber']);
-  body.termsAccepted = true;
+  var body = _.pick(req.body, ['username', 'email', 'password']);
   var user = new User(body);
-  user.journeys = [];
-  user.deliveries = [];
+  user.itineraries = [];
 
   user.save().then(() => {
     return user.generateAuthToken();
@@ -149,31 +143,6 @@ app.post('/users/upload/id/:userId', (req, res) => {
   }
 });
 
-app.post('/users/upload/rec/:userId', (req, res) => {
-  if (!req.files) {
-    return res.status(400).send('No files were uploaded.');
-  } else {
-    let recFile = req.files.file.data;
-
-    User.findOneAndUpdate({
-        _id: req.params.userId
-      }, {
-        $set: {
-          recFile
-        }
-      }, {
-        new: true
-      })
-      .then((user) => {
-        res.send({
-          user
-        });
-      }).catch((e) => {
-        res.status(400).send();
-      })
-  }
-});
-
 app.get('/users/files/id/:id', (req, res) => {
   User.findOne({
     _id: req.params.id
@@ -191,22 +160,6 @@ app.get('/users/files/id/:id', (req, res) => {
   })
 });
 
-app.get('/users/files/rec/:id', (req, res) => {
-  User.findOne({
-    _id: req.params.id
-  }).then((user) => {
-    var decodedImage = new Buffer(user.recFile, 'base64');
-    fs.writeFile(__dirname + `userRec_user=${req.params.id}.jpg`, decodedImage, function (err) {
-      if (err) {
-        return res.status(500).send(err);
-      } else {
-        res.sendFile(__dirname + `userRec_user=${req.params.id}.jpg`)
-      }
-    })
-  }).catch((e) => {
-    console.log(e);
-  })
-});
 
 //---------------------------------Upload stuff (for images)------------------------------
 
@@ -283,81 +236,14 @@ app.patch('/users/:id', authenticate, (req, res) => {
     });
 });
 
-app.patch('/users/verify/:id', authenticate, (req, res) => {
-  //used ot verify/unverify a user
 
-  if (req.user.admin == false) {
-    return res.send(401);
-  }
-
-  var verification = _.pick(req.body, ['verified']);
-
-  User.findOneAndUpdate({
-      _id: req.params.id
-    }, {
-      $set: verification
-    }, {
-      new: true
-    })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send();
-      }
-      res.send({
-        user
-      })
-      let mailOptions = {
-        from: '"HerbalRun" <confirmation.herbalrun@gmail.com>', // sender address
-        to: user.email, // list of receivers
-        subject: "You've been verified! ✔", // Subject line
-        text: 'Hello world ?', // plain text body
-        html: "<b>Your patient information has been verified. Happy shopping!</b><br>" // html body
-      };
-
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          return console.log(error);
-        }
-        console.log('Message %s sent: %s', info.messageId, info.response);
-        res.send();
-      });
-    }).catch((e) => {
-      res.status(400).send();
-    })
-})
-
-
-
-app.post('/itinerary', authenticate, (req, res) => {
+app.post('/itinerary', (req, res) => {
   //creates new itinerary
 
-  if (req.user.admin == false) {
-    return res.send(401);
-  }
-
   var itinerary = new Itinerary({
-    name: req.body.name,
-    category: req.body.category,
-    thc: req.body.thc,
-    cbd: req.body.cbd,
-    cbn: req.body.cbn,
-    ppe: req.body.ppe,
-    ppq: req.body.ppq,
-    pph: req.body.pph,
-    ppo: req.body.ppo,
-    pphg_extract: req.body.pphg_extract,
-    ppg_extract: req.body.ppg_extract,
-    ppi: req.body.ppi,
-    stock: req.body.stock,
-    licenseNumber: req.body.licenseNumber,
-    flowerOriginal: req.body.flowerOriginal,
-    harvestData: req.body.harvestData,
-    harvestLot: req.body.harvestLot,
-    testedBy: req.body.testedBy,
-    testId: req.body.testId,
-    dateTested: req.body.dateTested,
-    icann: req.body.ican,
-    mmps: req.body.mmps,
+    startDate: req.body.startDate,
+    endDate: req.body.endDate,
+    location: req.body.location,
     imageFileName: req.body.imageFileName,
     _creator: req.user._id
   });
@@ -396,18 +282,18 @@ app.get('/itinerary/:id', (req, res) => {
   });
 });
 
-app.delete('/itinerary/:id', authenticate, (req, res) => {
+app.delete('/itinerary/:id', (req, res) => {
   //deletes itinerary by id
 
   var id = req.params.id;
 
-  if (req.user.admin == false) {
-    return res.status(401).send();
-  }
+  // if (req.user.admin == false) {
+  //   return res.status(401).send();
+  // }
 
-  if (!ObjectID.isValid(id)) {
-    return res.status(404).send();
-  };
+  // if (!ObjectID.isValid(id)) {
+  //   return res.status(404).send();
+  // };
 
   Itinerary.findOneAndRemove({
     _id: id,
@@ -424,15 +310,16 @@ app.delete('/itinerary/:id', authenticate, (req, res) => {
   });
 });
 
-app.patch('/itinerary/:id', authenticate, (req, res) => {
+app.patch('/itinerary/:id', (req, res) => {
   //make edits to an itinerary
+  //add edit functionality to events/comments
 
   if (req.user.admin == false) {
     return res.send(401);
   }
 
   var id = req.params.id;
-  var body = _.pick(req.body, ['name', 'category', 'thc', 'cbd', 'cbn', 'ppe', 'ppq', 'pph', 'ppo', 'pphg_extract', 'ppg_extract', 'ppi', 'stock', 'licenseNumber', 'flowerOriginal', 'harvestData', 'harvestLot', 'testedBy', 'testId', 'dateTested', 'icann', 'mmps', 'imageFileName']);
+  var body = _.pick(req.body, ['imageFileName']);
 
   if (req.user.admin == false) {
     return res.status(401).send();
@@ -460,17 +347,17 @@ app.patch('/itinerary/:id', authenticate, (req, res) => {
   })
 });
 
-app.get('/users/me', authenticate, (req, res) => {
+app.get('/users/me', (req, res) => {
   //returns the user
   res.send(req.user);
 });
 
-app.get('/users', authenticate, (req, res) => {
+app.get('/users', (req, res) => {
   //returns all the users
 
-  if (req.user.admin == false) {
-    return res.send(401);
-  }
+  // if (req.user.admin == false) {
+  //   return res.send(401);
+  // }
 
   User.find().then((user) => {
     res.send({
@@ -481,7 +368,7 @@ app.get('/users', authenticate, (req, res) => {
   });
 });
 
-app.get('/users/:id', authenticate, (req, res) => {
+app.get('/users/:id', (req, res) => {
 
   if (req.user.admin == false) {
     return res.send(401);
@@ -500,8 +387,8 @@ app.get('/users/:id', authenticate, (req, res) => {
 })
 
 
-app.get('/users/journeys/:id', (req, res) => {
-  //returns a the journeys by user id
+app.get('/users/itineraries/:id', (req, res) => {
+  //returns a the itineraries by user id
 
   User.findOne({
     _id: req.params.id
@@ -509,9 +396,9 @@ app.get('/users/journeys/:id', (req, res) => {
     if (!user) {
       return res.status(404).send();
     };
-    var journeys = user.journeys;
+    var itineraries = user.itineraries;
     res.send({
-      journeys
+      itineraries
     });
   }).catch((e) => {
     res.status(400).send();
@@ -543,14 +430,14 @@ app.delete('/users/me/token', authenticate, (req, res) => {
   });
 });
 
-app.patch('/journeys', authenticate, (req, res) => {
+app.patch('/itineraries', (req, res) => {
   var body = _.pick(req.body, ['itineraryId', 'units', 'quantity', 'name', 'ppe', 'ppq', 'pph', 'ppo', 'pphg_extract', 'ppg_extract', 'ppi']);
 
   User.findOneAndUpdate({
       _id: req.user._id
     }, {
       $push: {
-        journeys: body
+        itineraries: body
       }
     }, {
       new: true
@@ -568,14 +455,14 @@ app.patch('/journeys', authenticate, (req, res) => {
     });
 });;
 
-app.delete('/users/journeys/:id', authenticate, (req, res) => {
-  // removes itinerary from journeys
+app.delete('/users/itineraries/:id', authenticate, (req, res) => {
+  // removes itinerary from itineraries
 
   User.findOneAndUpdate({
       _id: req.user._id
     }, {
       $pull: {
-        journeys: {
+        itineraries: {
           _id: req.params.id
         }
       }
