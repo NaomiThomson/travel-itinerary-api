@@ -17,12 +17,12 @@ var ItinerarySchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  imageFile :{
+  imageFile: {
     type: Buffer
   },
   _creator: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
   },
   _created: {
     type: Date,
@@ -31,4 +31,6 @@ var ItinerarySchema = new mongoose.Schema({
 });
 
 var Itinerary = mongoose.model('Itinerary', ItinerarySchema);
-module.exports = {Itinerary};
+module.exports = {
+  Itinerary
+};

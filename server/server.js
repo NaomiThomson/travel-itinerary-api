@@ -256,7 +256,6 @@ app.post('/itinerary', authenticate, (req, res) => {
 });
 
 app.get('/itinerary', (req, res) => {
-  // returns inventoryitinerarys
 
   Itinerary.find().then((itinerary) => {
     res.send({
