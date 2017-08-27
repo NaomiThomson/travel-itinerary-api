@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 
 var UserSchema = new mongoose.Schema({
     username:{
+        _id: Number,
         type: String,
         required: true,
         trim: true,
@@ -39,6 +40,9 @@ var UserSchema = new mongoose.Schema({
             type: String,
             required: true
         }
+    }], 
+    itineraries: [{
+        type: mongoose.Schema.Types.ObjectId
     }]
 });
 

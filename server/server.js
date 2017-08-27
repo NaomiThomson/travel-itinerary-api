@@ -244,8 +244,8 @@ app.post('/itinerary', (req, res) => {
     startDate: req.body.startDate,
     endDate: req.body.endDate,
     location: req.body.location,
-    imageFileName: req.body.imageFileName,
-    _creator: req.user._id
+    imageFileName: req.body.imageFileName
+    // _creator: req.user._id
   });
 
   itinerary.save().then((doc) => {
@@ -355,9 +355,9 @@ app.get('/users/me', (req, res) => {
 app.get('/users', (req, res) => {
   //returns all the users
 
-  // if (req.user.admin == false) {
-  //   return res.send(401);
-  // }
+  if (req.user.admin == false) {
+    return res.send(401);
+  }
 
   User.find().then((user) => {
     res.send({
@@ -431,7 +431,7 @@ app.delete('/users/me/token', authenticate, (req, res) => {
 });
 
 app.patch('/itineraries', (req, res) => {
-  var body = _.pick(req.body, ['itineraryId', 'units', 'quantity', 'name', 'ppe', 'ppq', 'pph', 'ppo', 'pphg_extract', 'ppg_extract', 'ppi']);
+  var body = _.pick(req.body, ['itineraryId']);
 
   User.findOneAndUpdate({
       _id: req.user._id

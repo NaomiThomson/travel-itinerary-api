@@ -1,6 +1,6 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var Itinerary = mongoose.model('Itinerary',{
+var ItinerarySchema = new mongoose.Schema({
   startDate: {
     type: Date,
     required: true
@@ -30,4 +30,5 @@ var Itinerary = mongoose.model('Itinerary',{
   }
 });
 
+var Itinerary = mongoose.model('Itinerary', ItinerarySchema);
 module.exports = {Itinerary};
