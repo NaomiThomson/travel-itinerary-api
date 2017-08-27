@@ -239,6 +239,8 @@ app.patch('/users/:id', authenticate, (req, res) => {
 
 app.post('/itinerary', authenticate, (req, res) => {
   //creates new itinerary
+  console.log(req.body);
+  console.log(req.user);
 
   var itinerary = new Itinerary({
     startDate: req.body.startDate,
@@ -251,7 +253,7 @@ app.post('/itinerary', authenticate, (req, res) => {
   itinerary.save().then((doc) => {
     res.send(doc);
   }, (e) => {
-    res.status(400).send(e);
+    res.status(400).send('error in server');
   });
 });
 
