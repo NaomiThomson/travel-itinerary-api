@@ -20,10 +20,10 @@ var ItinerarySchema = new mongoose.Schema({
   imageFile :{
     type: Buffer
   },
-  _creator: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true
-  },
+  // _creator: {
+  //     type: mongoose.Schema.Types.ObjectId,
+  //     required: true
+  // },
   _created: {
     type: Date,
     default: Date.now
