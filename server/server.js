@@ -237,15 +237,15 @@ app.patch('/users/:id', authenticate, (req, res) => {
 });
 
 
-app.post('/itinerary', (req, res) => {
+app.post('/itinerary', authenticate, (req, res) => {
   //creates new itinerary
 
   var itinerary = new Itinerary({
     startDate: req.body.startDate,
     endDate: req.body.endDate,
     location: req.body.location,
-    imageFileName: req.body.imageFileName
-    // _creator: req.user._id
+    imageFileName: req.body.imageFileName,
+    _creator: req.user._id
   });
 
   itinerary.save().then((doc) => {
