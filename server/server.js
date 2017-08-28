@@ -268,6 +268,17 @@ app.get('/itinerary', (req, res) => {
   })
 });
 
+app.get('/itinerary/me', authenticate, (req, res) => {
+
+  Itinerary.find({_creator: req.user._id}).then((itinerary) => {
+    res.send({
+      itinerary
+    });
+  }, (e) => {
+    res.status(400).send(e);
+  })
+});
+
 app.get('/itinerary/:id', (req, res) => {
   //returns itinerary by id
 
