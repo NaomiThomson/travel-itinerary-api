@@ -271,6 +271,7 @@ app.get('/itinerary', (req, res) => {
 app.get('/itinerary/me', authenticate, (req, res) => {
 
   Itinerary.find({_creator: req.user._id}).then((itinerary) => {
+    console.log('found')
     res.send({
       itinerary
     });
