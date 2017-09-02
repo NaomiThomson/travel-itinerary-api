@@ -294,7 +294,7 @@ app.get('/itinerary/:id', (req, res) => {
   });
 });
 
-app.delete('/itinerary/:id', authenticate, (req, res) => {
+app.delete('/itinerary/:id', (req, res) => {
   //deletes itinerary by id
 
   var id = req.params.id;
