@@ -300,7 +300,7 @@ app.delete('/itinerary/:id', (req, res) => {
   var id = req.params.id;
 
   Itinerary.findOneAndRemove({
-    _id: id,
+    _id: id
     // _creator: req.user._id //this makes sure its right person
   }).then((itinerary) => {
     if (!itinerary) {
@@ -310,7 +310,7 @@ app.delete('/itinerary/:id', (req, res) => {
       itinerary
     });
   }).catch((e) => {
-    res.status(400).send();
+    res.status(400).send('delete route not working');
   });
 });
 
