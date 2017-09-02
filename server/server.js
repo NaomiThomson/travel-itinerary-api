@@ -303,9 +303,9 @@ app.delete('/itinerary/:id', (req, res) => {
     _id: id
     // _creator: req.user._id //this makes sure its right person
   }).then((itinerary) => {
-    if (!itinerary) {
-      return res.status(404).send();
-    };
+    // if (!itinerary) {
+    //   return res.status(404).send();
+    // };
     res.send({
       itinerary
     });
