@@ -271,7 +271,6 @@ app.get('/itinerary', (req, res) => {
 app.get('/itinerary/me', authenticate, (req, res) => {
 
   Itinerary.find({_creator: req.user._id}).then((itinerary) => {
-    console.log('found')
     res.send({
       itinerary
     });
@@ -295,18 +294,10 @@ app.get('/itinerary/:id', (req, res) => {
   });
 });
 
-app.delete('/itinerary/:id', (req, res) => {
+app.delete('/itinerary/:id', authenticate, (req, res) => {
   //deletes itinerary by id
 
   var id = req.params.id;
-
-  // if (req.user.admin == false) {
-  //   return res.status(401).send();
-  // }
-
-  // if (!ObjectID.isValid(id)) {
-  //   return res.status(404).send();
-  // };
 
   Itinerary.findOneAndRemove({
     _id: id,
