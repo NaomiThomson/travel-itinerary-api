@@ -311,7 +311,7 @@ app.delete('/itinerary/:id', authenticate, (req, res) => {
   });
 });
 
-app.patch('/itinerary/:id', (req, res) => {
+app.patch('/itinerary/:id', authenticate, (req, res) => {
   //make edits to an itinerary
   //add edit functionality to events/comments
 
