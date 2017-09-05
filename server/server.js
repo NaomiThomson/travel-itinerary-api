@@ -315,20 +315,7 @@ app.patch('/itinerary/:id', (req, res) => {
   //make edits to an itinerary
   //add edit functionality to events/comments
 
-  if (req.user.admin == false) {
-    return res.send(401);
-  }
-
   var id = req.params.id;
-  var body = _.pick(req.body, ['imageFileName']);
-
-  if (req.user.admin == false) {
-    return res.status(401).send();
-  }
-
-  if (!ObjectID.isValid(id)) {
-    return res.status(404).send();
-  };
 
   Itinerary.findOneAndUpdate({
     _id: id
