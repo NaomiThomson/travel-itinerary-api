@@ -320,7 +320,7 @@ app.patch('/itinerary/:id', authenticate, (req, res) => {
   Itinerary.findOneAndUpdate({
     _id: id
   }, {
-    $set: body
+    $set: req.body
   }, {
     new: true
   }).then((itinerary) => {
