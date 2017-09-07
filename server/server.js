@@ -256,9 +256,6 @@ app.post('/journey', authenticate, (req, res) => {
 });
 
 app.patch('/journey/addentry/:id', authenticate, (req, res) => {
-  if (doc._creator !== req.user._id) {
-    return res.status(401).send('Not Authorized');
-  }
 
   journey.findOneAndUpdate({
       _id: req.params.id
