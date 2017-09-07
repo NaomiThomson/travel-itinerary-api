@@ -259,7 +259,7 @@ app.patch('/journey/addentry/:id', authenticate, (req, res) => {
 
   console.log(req.body);
 
-  journey.findOneAndUpdate({
+  Journey.findOneAndUpdate({
       _id: req.params.id
     }, {
       $push: {
