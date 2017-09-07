@@ -9,7 +9,7 @@ var JourneySchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  location: {
+  destination: {
     type: String,
     required: true
   },
