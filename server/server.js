@@ -279,7 +279,7 @@ app.patch('/journey/addentry/:id', authenticate, (req, res) => {
 
 app.get('/journey', (req, res) => {
 
-  journey.find().then((journey) => {
+  Journey.find().then((journey) => {
     res.send({
       journey
     });
@@ -290,7 +290,7 @@ app.get('/journey', (req, res) => {
 
 app.get('/journey/me', authenticate, (req, res) => {
 
-  journey.find({
+  Journey.find({
     _creator: req.user._id
   }).then((journey) => {
     res.send({
@@ -304,7 +304,7 @@ app.get('/journey/me', authenticate, (req, res) => {
 app.get('/journey/:id', (req, res) => {
   //returns journey by id
 
-  journey.findOne({
+  Journey.findOne({
     _id: req.params.id
   }).then((journey) => {
     if (!journey) {
@@ -321,7 +321,7 @@ app.delete('/journey/:id', authenticate, (req, res) => {
 
   var id = req.params.id;
 
-  journey.findOneAndRemove({
+  Journey.findOneAndRemove({
     _id: id
     // _creator: req.user._id //this makes sure its right person
   }).then((journey) => {
@@ -337,7 +337,7 @@ app.patch('/journey/:id', authenticate, (req, res) => {
 
   var id = req.params.id;
 
-  journey.findOneAndUpdate({
+  Journey.findOneAndUpdate({
     _id: id
   }, {
     $set: req.body
