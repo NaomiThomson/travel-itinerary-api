@@ -257,13 +257,15 @@ app.post('/journey', authenticate, (req, res) => {
 
 app.patch('/journey/addentry/:id', authenticate, (req, res) => {
 
-  console.log(req.body);
+  var newEntry = {
+    entryText: req.body.entries
+  }
 
   Journey.findOneAndUpdate({
       _id: req.params.id
     }, {
       $push: {
-        entries: req.body.entries
+        entries: entryText
       }
     }, {
       new: true
