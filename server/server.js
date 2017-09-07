@@ -246,6 +246,7 @@ app.post('/itinerary', authenticate, (req, res) => {
     startDate: req.body.startDate,
     endDate: req.body.endDate,
     location: req.body.location,
+    title: req.body.title,
     imageFileName: req.body.imageFileName,
     _creator: req.user._id
   });

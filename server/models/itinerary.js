@@ -13,6 +13,10 @@ var ItinerarySchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  title: {
+    type: String,
+    required: true
+  },
   imageFileName: {
     type: String,
     required: false
