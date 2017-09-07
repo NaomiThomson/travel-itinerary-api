@@ -17,6 +17,16 @@ var ItinerarySchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  entries: [{
+    entryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: false
+    },
+    entryText: {
+      type: String,
+      required: false
+    }
+  }],
   imageFileName: {
     type: String,
     required: false
