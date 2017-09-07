@@ -257,6 +257,8 @@ app.post('/journey', authenticate, (req, res) => {
 
 app.patch('/journey/addentry/:id', authenticate, (req, res) => {
 
+  console.log(req.body);
+
   journey.findOneAndUpdate({
       _id: req.params.id
     }, {
@@ -330,8 +332,6 @@ app.delete('/journey/:id', authenticate, (req, res) => {
 });
 
 app.patch('/journey/:id', authenticate, (req, res) => {
-  //make edits to an journey
-  //add edit functionality to events/comments
 
   var id = req.params.id;
 
