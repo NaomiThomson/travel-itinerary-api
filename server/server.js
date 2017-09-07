@@ -265,7 +265,7 @@ app.patch('/journey/addentry/:id', authenticate, (req, res) => {
       _id: req.params.id
     }, {
       $push: {
-        entries: entryText
+        entries: newEntry
       }
     }, {
       new: true
