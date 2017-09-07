@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-var ItinerarySchema = new mongoose.Schema({
+var JourneySchema = new mongoose.Schema({
   startDate: {
     type: Date,
     required: true
@@ -18,10 +18,6 @@ var ItinerarySchema = new mongoose.Schema({
     required: true
   },
   entries: [{
-    entryId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: false
-    },
     entryText: {
       type: String,
       required: false
@@ -44,7 +40,7 @@ var ItinerarySchema = new mongoose.Schema({
   }
 });
 
-var Itinerary = mongoose.model('Itinerary', ItinerarySchema);
+var Journey = mongoose.model('Journey', JourneySchema);
 module.exports = {
-  Itinerary
+  Journey
 };

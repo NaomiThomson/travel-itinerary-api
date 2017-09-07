@@ -12,8 +12,8 @@ var {
   mongoose
 } = require('./db/mongoose');
 var {
-  Itinerary
-} = require('./models/itinerary');
+  Journey
+} = require('./models/journey');
 var {
   User
 } = require('./models/user');
@@ -163,14 +163,14 @@ app.get('/users/files/id/:id', (req, res) => {
 
 //---------------------------------Upload stuff (for images)------------------------------
 
-app.post('/upload/itinerary/:itineraryId', (req, res) => {
+app.post('/upload/journey/:journeyId', (req, res) => {
   if (!req.files) {
     return res.status(400).send('No files were uploaded.');
   } else {
     let imageFile = req.files.file.data;
 
-    Itinerary.findOneAndUpdate({
-        _id: req.params.itineraryId
+    journey.findOneAndUpdate({
+        _id: req.params.journeyId
       }, {
         $set: {
           imageFile
@@ -178,9 +178,9 @@ app.post('/upload/itinerary/:itineraryId', (req, res) => {
       }, {
         new: true
       })
-      .then((itinerary) => {
+      .then((journey) => {
         res.send({
-          itinerary
+          journey
         });
       }).catch((e) => {
         res.status(400).send();
@@ -188,16 +188,16 @@ app.post('/upload/itinerary/:itineraryId', (req, res) => {
   }
 });
 
-app.get('/upload/itinerary/:itineraryId', (req, res) => {
-  Itinerary.findOne({
-    _id: req.params.itineraryId
+app.get('/upload/journey/:journeyId', (req, res) => {
+  journey.findOne({
+    _id: req.params.journeyId
   }).then((user) => {
     var decodedImage = new Buffer(user.imageFile, 'base64');
-    fs.writeFile(__dirname + `itineraryId=${req.params.itineraryId}.jpg`, decodedImage, function (err) {
+    fs.writeFile(__dirname + `journeyId=${req.params.journeyId}.jpg`, decodedImage, function (err) {
       if (err) {
         return res.status(500).send(err);
       } else {
-        res.sendFile(__dirname + `itineraryId=${req.params.itineraryId}.jpg`)
+        res.sendFile(__dirname + `journeyId=${req.params.journeyId}.jpg`)
       }
     })
   }).catch((e) => {
@@ -237,99 +237,119 @@ app.patch('/users/:id', authenticate, (req, res) => {
 });
 
 
-app.post('/itinerary', authenticate, (req, res) => {
-  //creates new itinerary
-  console.log(req.body);
-  console.log(req.user);
+app.post('/journey', authenticate, (req, res) => {
 
-  var itinerary = new Itinerary({
+  var journey = new Journey({
     startDate: req.body.startDate,
     endDate: req.body.endDate,
-    location: req.body.location,
+    destination: req.body.destination,
     title: req.body.title,
     imageFileName: req.body.imageFileName,
     _creator: req.user._id
   });
 
-  itinerary.save().then((doc) => {
+  journey.save().then((doc) => {
     res.send(doc);
   }, (e) => {
-    res.status(400).send('error in server');
+    res.status(400).send('Unable to save');
   });
 });
 
-app.get('/itinerary', (req, res) => {
+app.patch('/journey/addentry/:id', authenticate, (req, res) => {
+  if (doc._creator !== req.user._id) {
+    return res.status(401).send('Not Authorized');
+  }
 
-  Itinerary.find().then((itinerary) => {
+  journey.findOneAndUpdate({
+      _id: req.params.id
+    }, {
+      $push: {
+        entries: req.body.entries
+      }
+    }, {
+      new: true
+    })
+    .then((doc) => {
+      res.send(doc)
+    }).catch((e) => {
+      res.status(400).send('Unable to update')
+    });
+});
+
+app.get('/journey', (req, res) => {
+
+  journey.find().then((journey) => {
     res.send({
-      itinerary
+      journey
     });
   }, (e) => {
     res.status(400).send(e);
   })
 });
 
-app.get('/itinerary/me', authenticate, (req, res) => {
+app.get('/journey/me', authenticate, (req, res) => {
 
-  Itinerary.find({_creator: req.user._id}).then((itinerary) => {
+  journey.find({
+    _creator: req.user._id
+  }).then((journey) => {
     res.send({
-      itinerary
+      journey
     });
   }, (e) => {
     res.status(400).send(e);
   })
 });
 
-app.get('/itinerary/:id', (req, res) => {
-  //returns itinerary by id
+app.get('/journey/:id', (req, res) => {
+  //returns journey by id
 
-  Itinerary.findOne({
+  journey.findOne({
     _id: req.params.id
-  }).then((itinerary) => {
-    if (!itinerary) {
+  }).then((journey) => {
+    if (!journey) {
       return res.status(404).send();
     }
     res.send({
-      itinerary
+      journey
     })
   });
 });
 
-app.delete('/itinerary/:id', authenticate, (req, res) => {
-  //deletes itinerary by id
+app.delete('/journey/:id', authenticate, (req, res) => {
+  //deletes journey by id
 
   var id = req.params.id;
 
-  Itinerary.findOneAndRemove({
+  journey.findOneAndRemove({
     _id: id
     // _creator: req.user._id //this makes sure its right person
-  }).then((itinerary) => {
+  }).then((journey) => {
     res.send({
-      itinerary
+      journey
     });
   }).catch((e) => {
     res.status(400).send('delete route not working');
   });
 });
 
-app.patch('/itinerary/:id', authenticate, (req, res) => {
-  //make edits to an itinerary
+app.patch('/journey/:id', authenticate, (req, res) => {
+  //make edits to an journey
   //add edit functionality to events/comments
 
   var id = req.params.id;
 
-  Itinerary.findOneAndUpdate({
+  journey.findOneAndUpdate({
     _id: id
   }, {
     $set: req.body
   }, {
     new: true
-  }).then((itinerary) => {
-    if (!itinerary) {
+  }).then((journey) => {
+    if (!journey) {
       return res.status(404).send();
     }
     res.send({
-      itinerary
+      journey
     });
   }).catch((e) => {
     res.status(400).send();
@@ -420,7 +440,7 @@ app.delete('/users/me/token', authenticate, (req, res) => {
 });
 
 app.patch('/itineraries', (req, res) => {
-  var body = _.pick(req.body, ['itineraryId']);
+  var body = _.pick(req.body, ['journeyId']);
 
   User.findOneAndUpdate({
       _id: req.user._id
@@ -445,7 +465,7 @@ app.patch('/itineraries', (req, res) => {
 });;
 
 app.delete('/users/itineraries/:id', authenticate, (req, res) => {
-  // removes itinerary from itineraries
+  // removes journey from itineraries
 
   User.findOneAndUpdate({
       _id: req.user._id
