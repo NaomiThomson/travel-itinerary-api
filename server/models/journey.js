@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const _ = require('lodash');
 
 var JourneySchema = new mongoose.Schema({
   startDate: {
