@@ -194,7 +194,7 @@ app.patch('/journey/addentry/:id', authenticate, (req, res) => {
     _id: req.params.id
   }, {
       $push: {
-        entries: { entryText: "hello" }
+        entries: req.body
         //req.body.entries needs to be the type of object entires consumes
       }
     }, {
