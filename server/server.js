@@ -79,7 +79,15 @@ app.post('/upload/journey/:id', (req, res) => {
   } else {
     let imageFile = req.files.file.data;
 
-    Journey.findOneAndUpdate({ _id: req.params.id }, { $set: { imageFile } }, { new: true }).then((journey) => {
+    Journey.findOneAndUpdate({
+      _id: req.params.id
+    }, {
+      $set: {
+        imageFile
+      }
+    }, {
+      new: true
+    }).then((journey) => {
       res.send('File Uploaded Successfully')
     }).catch((e) => {
       res.status(400).send();
@@ -89,7 +97,9 @@ app.post('/upload/journey/:id', (req, res) => {
 
 app.get('/files/journey/:id', (req, res) => {
 
-  Journey.findOne({ _id: req.params.id }).then((journey) => {
+  Journey.findOne({
+    _id: req.params.id
+  }).then((journey) => {
     var decodedImage = new Buffer(journey.imageFile, 'base64');
     fs.writeFile(__dirname + `journeyId=${req.params.id}.jpg`, decodedImage, function (err) {
       if (err) {
@@ -120,8 +130,8 @@ app.patch('/users/:id', authenticate, (req, res) => {
   }
 
   User.findOneAndUpdate({
-    _id: req.params.id
-  }, {
+      _id: req.params.id
+    }, {
       $set: body
     }, {
       new: true
@@ -158,7 +168,15 @@ app.post('/journey', authenticate, (req, res) => {
 
 app.patch('/journey/hasFile/true/:id', (req, res) => {
 
-  Journey.findOneAndUpdate({_id: req.params.id}, {$set: {hasFile: true}} , {new: true}).then((journey) => {
+  Journey.findOneAndUpdate({
+    _id: req.params.id
+  }, {
+    $set: {
+      hasFile: true
+    }
+  }, {
+    new: true
+  }).then((journey) => {
     res.send('switched to true');
   }).catch((e) => {
     res.status(400).send();
@@ -191,8 +209,8 @@ app.patch('/journey/addentry/:id', authenticate, (req, res) => {
   // });
 
   Journey.findOneAndUpdate({
-    _id: req.params.id
-  }, {
+      _id: req.params.id
+    }, {
       $push: {
         entries: req.body
         //req.body.entries needs to be the type of object entires consumes
@@ -251,59 +269,37 @@ app.get('/journey/:id', (req, res) => {
 app.delete('/journey/:id', authenticate, (req, res) => {
   //deletes journey by id
 
-
-  Journey.findOne({ _id: req.params.id }).then((journey) => {
-    if (journey._id != req.user._id) {
-      return res.status(401).send('Unauthorized');
-    } else {
-      Journey.findOneAndRemove({
-        _id: req.params.id
-        // _creator: req.user._id //this makes sure its right person
-      }).then((journey) => {
-        res.send({
-          journey
-        });
-      }).catch((e) => {
-        res.status(400).send('delete route not working');
-      });
-    }
+  Journey.findOneAndRemove({
+    _id: req.params.id
+  }).then((journey) => {
+    res.send({
+      journey
+    });
   }).catch((e) => {
-    console.log(e);
-    console.log('journey not found');
-  })
+    res.status(400).send('delete route not working');
+  });
 
 
 });
 
 app.patch('/journey/:id', authenticate, (req, res) => {
 
-  Journey.findOne({ _id: req.params.id }).then((journey) => {
-    if (journey._creator != req.user._id) {
-      return res.status(401).send('Unauthorized');
-    } else {
-      Journey.findOneAndUpdate({
-        _id: req.params.id
-      }, {
-          $set: req.body
-        }, {
-          new: true
-        }).then((journey) => {
-          if (!journey) {
-            return res.status(404).send();
-          }
-          res.send({
-            journey
-          });
-        }).catch((e) => {
-          res.status(400).send();
-        })
+  Journey.findOneAndUpdate({
+    _id: req.params.id
+  }, {
+    $set: req.body
+  }, {
+    new: true
+  }).then((journey) => {
+    if (!journey) {
+      return res.status(404).send();
     }
+    res.send({
+      journey
+    });
   }).catch((e) => {
-    console.log(e);
-    console.log('journey not found');
+    res.status(400).send();
   })
-
-
 
 });
 
@@ -387,8 +383,8 @@ app.delete('/users/itineraries/:id', authenticate, (req, res) => {
   // removes journey from itineraries
 
   User.findOneAndUpdate({
-    _id: req.user._id
-  }, {
+      _id: req.user._id
+    }, {
       $pull: {
         itineraries: {
           _id: req.params.id
