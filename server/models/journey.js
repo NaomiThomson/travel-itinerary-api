@@ -23,12 +23,12 @@ var JourneySchema = new mongoose.Schema({
       required: false
     }
   }],
-  imageFileName: {
-    type: String,
-    required: false
-  },
   imageFile: {
     type: Buffer
+  },
+  hasFile: {
+    type: Boolean,
+    default: false
   },
   _creator: {
     type: mongoose.Schema.Types.ObjectId,
@@ -39,6 +39,15 @@ var JourneySchema = new mongoose.Schema({
     default: Date.now
   }
 });
+
+JourneySchema.methods.toJSON = function () {
+  //we do this so sensitive info like token/password dont get sent back.
+  //we have to convert from mongoose to normal object so we can pick
+  var journey = this;
+  var journeyObject = journey.toObject();
+
+  return _.pick(journeyObject, ['_id', 'email', 'username']);
+};
 
 var Journey = mongoose.model('Journey', JourneySchema);
 module.exports = {
