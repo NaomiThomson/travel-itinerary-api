@@ -169,14 +169,15 @@ app.patch('/journey/addentry/:id', authenticate, (req, res) => {
 
   //first we find a journey so we can see who the creator is. then we make sure its the same person thats making the request. if so, we proceed to the query
   Journey.findOne({ _id: req.params.id }).then((journey) => {
-    // if (journey._creator !== req.user._id) {
-    //   return res.status(401).send('Unauthorized');
-    // } else {
+    if (journey._creator !== req.user._id) {
+      return res.status(401).send('Unauthorized');
+    } else {
       Journey.findOneAndUpdate({
         _id: req.params.id
       }, {
           $push: {
-            entries: req.body.entries
+            entries: {entryText: "hello"}
+            //req.body.entries needs to be the type of object entires consumes
           }
         }, {
           new: true
@@ -186,7 +187,7 @@ app.patch('/journey/addentry/:id', authenticate, (req, res) => {
         }).catch((e) => {
           res.status(400).send('Unable to update')
         });
-    // }
+    }
   });
 
 
