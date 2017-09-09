@@ -47,7 +47,7 @@ JourneySchema.methods.toJSON = function () {
   var journey = this;
   var journeyObject = journey.toObject();
 
-  return _.pick(journeyObject, ['_id', 'email', 'username']);
+  return _.pick(journeyObject, ['_id', 'startDate', 'endDate', 'destination', 'title', 'entries', 'hasFile', '_creator']);
 };
 
 var Journey = mongoose.model('Journey', JourneySchema);
