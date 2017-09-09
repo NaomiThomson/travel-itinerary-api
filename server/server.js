@@ -53,51 +53,6 @@ app.use(function (req, res, next) {
 app.use(bodyParser.json());
 app.use(fileUpload());
 
-//-----------testing file upload-----------------
-app.post('/upload', (req, res) => {
-  console.log('---------1------------');
-  console.log(req.files);
-  console.log('----------2-----------');
-
-  if (!req.files) {
-    return res.status(400).send('No files were uploaded.');
-  } else {
-    let sampleFile = req.files.sampleFile;
-    console.log(sampleFile);
-
-    let image = new Image({
-      name: "sampleFile",
-      file: req.files.sampleFile.data
-    });
-
-    image.save().then(() => {
-      res.send('Uploaded')
-    }).catch((e) => {
-      console.log(e);
-      res.status(500).send(e);
-    })
-  }
-});
-
-app.get('/image', (req, res) => {
-  Image.find().then((images) => {
-    console.log(images[0].file);
-    // var image = new Image();
-    // image.src = `data:image/png;base64,${images[0].file}`;
-    var decodedImage = new Buffer(images[0].file, 'base64');
-    fs.writeFile(__dirname + '/image_decoded.jpg', decodedImage, function (err) {
-      if (err) {
-        return res.status(500).send(err);
-      } else {
-        res.sendFile(__dirname + '/image_decoded.jpg');
-      }
-    });
-  }).catch((e) => {
-    console.log(e);
-  })
-});
-
-
 //----------------------------
 
 app.post('/users', (req, res) => {
@@ -116,96 +71,38 @@ app.post('/users', (req, res) => {
   })
 });
 
-//---------------------------------Upload stuff (for users)------------------------------
+//---------------------------------Upload Journey Image------------------------------
 
-app.post('/users/upload/id/:userId', (req, res) => {
-  if (!req.files) {
-    return res.status(400).send('No files were uploaded.');
-  } else {
-    let idFile = req.files.file.data;
-
-    User.findOneAndUpdate({
-        _id: req.params.userId
-      }, {
-        $set: {
-          idFile
-        }
-      }, {
-        new: true
-      })
-      .then((user) => {
-        res.send({
-          user
-        });
-      }).catch((e) => {
-        res.status(400).send();
-      })
-  }
-});
-
-app.get('/users/files/id/:id', (req, res) => {
-  User.findOne({
-    _id: req.params.id
-  }).then((user) => {
-    var decodedImage = new Buffer(user.idFile, 'base64');
-    fs.writeFile(__dirname + `userId_user=${req.params.id}.jpg`, decodedImage, function (err) {
-      if (err) {
-        return res.status(500).send(err);
-      } else {
-        res.sendFile(__dirname + `userId_user=${req.params.id}.jpg`)
-      }
-    })
-  }).catch((e) => {
-    console.log(e);
-  })
-});
-
-
-//---------------------------------Upload stuff (for images)------------------------------
-
-app.post('/upload/journey/:journeyId', (req, res) => {
+app.post('/upload/journey/:id', (req, res) => {
   if (!req.files) {
     return res.status(400).send('No files were uploaded.');
   } else {
     let imageFile = req.files.file.data;
 
-    journey.findOneAndUpdate({
-        _id: req.params.journeyId
-      }, {
-        $set: {
-          imageFile
-        }
-      }, {
-        new: true
-      })
-      .then((journey) => {
-        res.send({
-          journey
-        });
-      }).catch((e) => {
-        res.status(400).send();
-      })
+    Journey.findOneAndUpdate({ _id: req.params.id }, { $set: { imageFile } }, { new: true }).then((journey) => {
+      res.send('File Uploaded Successfully')
+    }).catch((e) => {
+      res.status(400).send();
+    });
   }
 });
 
-app.get('/upload/journey/:journeyId', (req, res) => {
-  journey.findOne({
-    _id: req.params.journeyId
-  }).then((user) => {
-    var decodedImage = new Buffer(user.imageFile, 'base64');
-    fs.writeFile(__dirname + `journeyId=${req.params.journeyId}.jpg`, decodedImage, function (err) {
+app.get('/files/journey/:id', (req, res) => {
+
+  Journey.findOne({ _id: req.params.id }).then((journey) => {
+    var decodedImage = new Buffer(journey.imageFile, 'base64');
+    fs.writeFile(__dirname + `journeyId=${req.params.id}.jpg`, decodedImage, function (err) {
       if (err) {
         return res.status(500).send(err);
       } else {
-        res.sendFile(__dirname + `journeyId=${req.params.journeyId}.jpg`)
+        res.sendFile(__dirname + `journeyId=${req.params.id}.jpg`);
       }
     })
   }).catch((e) => {
     console.log(e);
-  })
+  });
 });
 
-//---------------------------------Upload stuff------------------------------
 
 app.patch('/users/:id', authenticate, (req, res) => {
   //edit user info
@@ -217,9 +114,14 @@ app.patch('/users/:id', authenticate, (req, res) => {
     return res.status(404).send();
   };
 
+  //makes sure right person is making the changes
+  if (req.user._id != req.params.id) {
+    return res.status(401).send();
+  }
+
   User.findOneAndUpdate({
-      _id: id
-    }, {
+    _id: req.params.id
+  }, {
       $set: body
     }, {
       new: true
@@ -244,7 +146,6 @@ app.post('/journey', authenticate, (req, res) => {
     endDate: req.body.endDate,
     destination: req.body.destination,
     title: req.body.title,
-    imageFileName: req.body.imageFileName,
     _creator: req.user._id
   });
 
@@ -255,26 +156,40 @@ app.post('/journey', authenticate, (req, res) => {
   });
 });
 
+app.patch('/journey/hasFile/true/:id', (req, res) => {
+
+  Journey.findOneAndUpdate({_id: req.params.id}, {$set: {hasFile: true}} , {new: true}).then((journey) => {
+    res.send('switched to true');
+  }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
 app.patch('/journey/addentry/:id', authenticate, (req, res) => {
 
-  var newEntry = {
-    entryText: req.body.entries
-  }
+  //first we find a journey so we can see who the creator is. then we make sure its the same person thats making the request. if so, we proceed to the query
+  Journey.findOne({ _id: req.params.id }).then((journey) => {
+    if (journey._creator !== req.user._id) {
+      return res.status(401).send('Unauthorized');
+    } else {
+      Journey.findOneAndUpdate({
+        _id: req.params.id
+      }, {
+          $push: {
+            entries: req.body.entries
+          }
+        }, {
+          new: true
+        })
+        .then((doc) => {
+          res.send(doc)
+        }).catch((e) => {
+          res.status(400).send('Unable to update')
+        });
+    }
+  });
 
-  Journey.findOneAndUpdate({
-      _id: req.params.id
-    }, {
-      $push: {
-        entries: newEntry
-      }
-    }, {
-      new: true
-    })
-    .then((doc) => {
-      res.send(doc)
-    }).catch((e) => {
-      res.status(400).send('Unable to update')
-    });
+
 });
 
 app.get('/journey', (req, res) => {
@@ -319,40 +234,60 @@ app.get('/journey/:id', (req, res) => {
 app.delete('/journey/:id', authenticate, (req, res) => {
   //deletes journey by id
 
-  var id = req.params.id;
 
-  Journey.findOneAndRemove({
-    _id: id
-    // _creator: req.user._id //this makes sure its right person
-  }).then((journey) => {
-    res.send({
-      journey
-    });
+  Journey.findOne({ _id: req.params.id }).then((journey) => {
+    if (journey._id != req.user._id) {
+      return res.status(401).send('Unauthorized');
+    } else {
+      Journey.findOneAndRemove({
+        _id: req.params.id
+        // _creator: req.user._id //this makes sure its right person
+      }).then((journey) => {
+        res.send({
+          journey
+        });
+      }).catch((e) => {
+        res.status(400).send('delete route not working');
+      });
+    }
   }).catch((e) => {
-    res.status(400).send('delete route not working');
-  });
+    console.log(e);
+    console.log('journey not found');
+  })
+
+
 });
 
 app.patch('/journey/:id', authenticate, (req, res) => {
 
-  var id = req.params.id;
-
-  Journey.findOneAndUpdate({
-    _id: id
-  }, {
-    $set: req.body
-  }, {
-    new: true
-  }).then((journey) => {
-    if (!journey) {
-      return res.status(404).send();
+  Journey.findOne({ _id: req.params.id }).then((journey) => {
+    if (journey._creator != req.user._id) {
+      return res.status(401).send('Unauthorized');
+    } else {
+      Journey.findOneAndUpdate({
+        _id: req.params.id
+      }, {
+          $set: req.body
+        }, {
+          new: true
+        }).then((journey) => {
+          if (!journey) {
+            return res.status(404).send();
+          }
+          res.send({
+            journey
+          });
+        }).catch((e) => {
+          res.status(400).send();
+        })
     }
-    res.send({
-      journey
-    });
   }).catch((e) => {
-    res.status(400).send();
+    console.log(e);
+    console.log('journey not found');
   })
+
+
+
 });
 
 app.get('/users/me', (req, res) => {
@@ -362,10 +297,6 @@ app.get('/users/me', (req, res) => {
 
 app.get('/users', (req, res) => {
   //returns all the users
-
-  if (req.user.admin == false) {
-    return res.send(401);
-  }
 
   User.find().then((user) => {
     res.send({
@@ -377,10 +308,6 @@ app.get('/users', (req, res) => {
 });
 
 app.get('/users/:id', (req, res) => {
-
-  if (req.user.admin == false) {
-    return res.send(401);
-  }
 
   User.findOne({
     _id: req.params.id
@@ -438,37 +365,13 @@ app.delete('/users/me/token', authenticate, (req, res) => {
   });
 });
 
-app.patch('/itineraries', (req, res) => {
-  var body = _.pick(req.body, ['journeyId']);
-
-  User.findOneAndUpdate({
-      _id: req.user._id
-    }, {
-      $push: {
-        itineraries: body
-      }
-    }, {
-      new: true
-    })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send();
-      }
-      res.send({
-        user
-      });
-    }).catch((e) => {
-      console.log(e);
-      res.status(400).send();
-    });
-});;
 
 app.delete('/users/itineraries/:id', authenticate, (req, res) => {
   // removes journey from itineraries
 
   User.findOneAndUpdate({
-      _id: req.user._id
-    }, {
+    _id: req.user._id
+  }, {
       $pull: {
         itineraries: {
           _id: req.params.id
@@ -488,9 +391,6 @@ app.delete('/users/itineraries/:id', authenticate, (req, res) => {
       res.status(400).send();
     })
 });
-
-
-
 
 
 app.listen(port, () => {
